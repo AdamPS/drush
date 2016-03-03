@@ -213,6 +213,7 @@ function core_drush_command() {
       'drush php-eval \'variable_set("hello", "world");\'' => 'Sets the hello variable using Drupal API.',
       'drush php-eval \'$node = node_load(1); print $node->title;\'' => 'Loads node with nid 1 and then prints its title.',
       'drush php-eval "file_unmanaged_copy(\'$HOME/Pictures/image.jpg\', \'public://image.jpg\');"' => 'Copies a file whose path is determined by an environment\'s variable. Note the use of double quotes so the variable $HOME gets replaced by its value.',
+      'drush php-eval "node_access_rebuild();"' => 'Rebuild node access permissions.',
     ),
     'arguments' => array(
       'code' => 'PHP code',
@@ -435,7 +436,7 @@ function core_drush_engine_drupal() {
  */
 function drush_core_entity_updates() {
   if (drush_get_context('DRUSH_SIMULATE')) {
-    drush_log(dt('entity-updates command does not support --simpulate option.'), LogLevel::OK);
+    drush_log(dt('entity-updates command does not support --simulate option.'), LogLevel::OK);
   }
 
   drush_include_engine('drupal', 'update');
