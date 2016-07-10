@@ -4,6 +4,7 @@ namespace Drush\Boot;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Psr\Log\LoggerInterface;
 use Drupal\Core\DrupalKernel;
 
 class DrupalBoot8 extends DrupalBoot {
@@ -36,7 +37,7 @@ class DrupalBoot8 extends DrupalBoot {
     drush_drupal_load_autoloader($drupal_root);
     // Drush depends on bootstrap being loaded at this point.
     require_once $drupal_root .'/core/includes/bootstrap.inc';
-    if (defined('Drupal::VERSION')) {
+    if (defined('\Drupal::VERSION')) {
       return \Drupal::VERSION;
     }
   }
@@ -70,7 +71,8 @@ class DrupalBoot8 extends DrupalBoot {
     // channel.
     $container = \Drupal::getContainer();
     $parser = $container->get('logger.log_message_parser');
-    $drushLogger = drush_get_context('DRUSH_LOG_CALLBACK');
+
+    $drushLogger = \Drush::logger();
     $logger = new \Drush\Log\DrushLog($parser, $drushLogger);
     $container->get('logger.factory')->addLogger($logger);
   }

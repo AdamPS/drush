@@ -49,8 +49,8 @@ define('DRUSH_CACHE_LIFETIME_DEFAULT', 86400);
  * Include a file, selecting a version specific file if available.
  *
  * For example, if you pass the path "/var/drush" and the name
- * "update" when bootstrapped on a Drupal 6 site it will first check for
- * the presence of "/var/drush/update_6.inc" in include it if exists. If this
+ * "update" when bootstrapped on a Drupal 8 site it will first check for
+ * the presence of "/var/drush/update_8.inc" in include it if exists. If this
  * file does NOT exist it will proceed and check for "/var/drush/update.inc".
  * If neither file exists, it will return FALSE.
  *
@@ -1262,19 +1262,14 @@ function drush_log($message, $type = LogLevel::NOTICE, $error = null) {
 }
 
 /**
- * Future: add some sort of dependency injection to Drush.
- */
-function _drush_create_default_logger() {
-  $drush_logger = new Logger();
-  drush_set_context('DRUSH_LOG_CALLBACK', $drush_logger);
-}
-
-/**
  * Call the default logger, or the user's log callback, as
  * appropriate.
  */
 function _drush_log($entry) {
   $callback = drush_get_context('DRUSH_LOG_CALLBACK');
+  if (!$callback) {
+    $callback = \Drush::logger();
+  }
 
   if ($callback instanceof LoggerInterface) {
     $context = $entry;

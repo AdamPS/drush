@@ -50,14 +50,21 @@ function _drush_backend_batch_process($command = 'batch-process', $args, $option
 
     drush_include_engine('drupal', 'environment');
     // Store the batch.
-    db_insert('batch')
-      ->fields(array(
-        'bid' => $batch['id'],
-        'timestamp' => REQUEST_TIME,
-        'token' => drush_get_token($batch['id']),
-        'batch' => serialize($batch),
-      ))
-      ->execute();
+    if (drush_drupal_major_version() >= 8) {
+      /** @var \Drupal\Core\Batch\BatchStorage $batch_storage */
+      $batch_storage = \Drupal::service('batch.storage');
+      $batch_storage->create($batch);
+    }
+    else {
+      db_insert('batch')
+        ->fields(array(
+          'bid' => $batch['id'],
+          'timestamp' => REQUEST_TIME,
+          'token' => drush_get_token($batch['id']),
+          'batch' => serialize($batch),
+        ))
+        ->execute();
+    }
     $finished = FALSE;
 
     // Not used in D8+ and possibly earlier.
@@ -235,16 +242,24 @@ function _drush_batch_finished() {
         $queue = _batch_queue($batch_set);
         $operations = $queue->getAllItems();
         $elapsed = $batch_set['elapsed'] / 1000;
-        $elapsed = drush_drupal_major_version() >=8 ? Drupal::service('date.formatter')->formatInterval($elapsed) : format_interval($elapsed);
+        $elapsed = drush_drupal_major_version() >=8 ? \Drupal::service('date.formatter')->formatInterval($elapsed) : format_interval($elapsed);
         $batch_set['finished']($batch_set['success'], $batch_set['results'], $operations, $elapsed);
       }
     }
   }
 
   // Clean up the batch table and unset the static $batch variable.
-  db_delete('batch')
-    ->condition('bid', $batch['id'])
-    ->execute();
+  if (drush_drupal_major_version() >= 8) {
+    /** @var \Drupal\Core\Batch\BatchStorage $batch_storage */
+    $batch_storage = \Drupal::service('batch.storage');
+    $batch_storage->delete($batch['id']);
+  }
+  else {
+    db_delete('batch')
+      ->condition('bid', $batch['id'])
+      ->execute();
+  }
+
   foreach ($batch['sets'] as $batch_set) {
     if ($queue = _batch_queue($batch_set)) {
       $queue->deleteQueue();
@@ -261,9 +276,16 @@ function _drush_batch_finished() {
  */
 function _drush_batch_shutdown() {
  if ($batch = batch_get()) {
-    db_update('batch')
-      ->fields(array('batch' => serialize($batch)))
-      ->condition('bid', $batch['id'])
-      ->execute();
+   if (drush_drupal_major_version() >= 8) {
+     /** @var \Drupal\Core\Batch\BatchStorage $batch_storage */
+     $batch_storage = \Drupal::service('batch.storage');
+     $batch_storage->update($batch);
+   }
+   else {
+     db_update('batch')
+       ->fields(array('batch' => serialize($batch)))
+       ->condition('bid', $batch['id'])
+       ->execute();
+   }
   }
 }
