@@ -176,7 +176,7 @@ class SqlBase {
     // but the sql query itself is stored in a temp file and not displayed.
     // We show the query when --debug is used and this function created the temp file.
     if ((drush_get_context('DRUSH_DEBUG') || drush_get_context('DRUSH_SIMULATE')) && empty($input_file_original)) {
-      drush_log('sql-query: ' . $query, LogLevel::NOTICE);
+      drush_log('sql-query: ' . $query, LogLevel::INFO);
     }
 
     $success = drush_shell_exec($exec);
@@ -200,7 +200,7 @@ class SqlBase {
       // Enable prefix processing which can be dangerous so off by default. See http://drupal.org/node/1219850.
       if (drush_get_option('db-prefix')) {
         if (drush_drupal_major_version() >= 7) {
-          $query = Database::getConnection()->prefixTables($query);
+          $query = \Database::getConnection()->prefixTables($query);
         }
         else {
           $query = db_prefix_tables($query);

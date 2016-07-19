@@ -159,9 +159,6 @@ function drush_views_dev() {
     'ui.show.sql_query.where' => 'above',
     'ui.show.performance_statistics' => TRUE,
     'ui.show.additional_queries' => TRUE,
-    'debug.output' => TRUE,
-    'debug.region' => 'message',
-    'ui.show.display_embed' => TRUE,
   );
 
   $config = \Drupal::configFactory()->getEditable('views.settings');
@@ -386,7 +383,7 @@ function _views_drush_op($op = '', array $view_names = array()) {
         drush_log(dt('View: @view has been @action', $tokens), LogLevel::SUCCESS);
       }
       else {
-        drush_log(dt('View: @view is already @action', $tokens), LogLevel::NOTICE);
+        drush_log(dt('View: @view is already @action', $tokens), LogLevel::INFO);
       }
       // Remove this view from the viewnames input list.
       unset($view_names[$view->id()]);
