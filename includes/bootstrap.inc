@@ -117,6 +117,9 @@ function _drush_bootstrap_selected_uri() {
   $uri = drush_get_context('DRUSH_SELECTED_URI');
   if (empty($uri)) {
     $site_path = drush_site_path();
+    if ($site_path) {
+      $site_path = _drush_convert_path($site_path);
+    }
     $elements = explode('/', $site_path);
     $current = array_pop($elements);
     if (!$current) {

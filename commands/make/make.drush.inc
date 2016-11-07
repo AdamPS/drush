@@ -155,13 +155,13 @@ function make_drush_command() {
       'makefile' => 'Filename of the makefile to convert.',
     ),
     'options' => array(
-      'format' => 'The format to which the make file should be converted. Accepted values include make, composer, and yml.'
+      'format' => 'The format to which the make file should be converted. Accepted values include make, composer, and yml.',
     ),
     'required-arguments' => TRUE,
     'examples' => array(
-      'drush make-convert example.make --format=yml' => 'Convert example.make to example.make.yml',
-      'drush make-convert example.make --format=composer' => 'Convert example.make to composer.json',
-      'drush make-convert composer.lock --format=make' => 'Convert composer.lock example.make',
+      'drush make-convert example.make --format=composer  > composer.json' => 'Convert example.make to composer.json',
+      'drush make-convert example.make --format=yml > example.make.yml' => 'Convert example.make to example.make.yml',
+      'drush make-convert composer.lock --format=make > example.make' => 'Convert composer.lock example.make',
     ),
   );
 
@@ -651,9 +651,11 @@ function drush_make_convert_composer_to_make($composer_lock, $composer_json) {
       $group[$project_name]['download']['url'] = $package['source']['url'];
       // Dev versions should use git branch + revision, otherwise a tag is used.
       if (strstr($package['version'], 'dev')) {
-        // Change 'dev-' prefix to '-dev' suffix.
+        // 'dev-' prefix indicates a branch-alias. Stripping the dev prefix from
+        // the branch name is sufficient.
+        // @see https://getcomposer.org/doc/articles/aliases.md
         if (strpos($package['version'], 'dev-') === 0) {
-          $group[$project_name]['download']['branch'] = str_replace('dev-', '', $package['version']) . '-dev';
+          $group[$project_name]['download']['branch'] = substr($package['version'], 4);
         }
         // Otherwise, leave as is. Version may already use '-dev' suffix.
         else {

@@ -275,7 +275,7 @@ function drush_get_global_options($brief = FALSE) {
   $options['debug']              = array('short-form' => 'd', 'context' => 'DRUSH_DEBUG', 'description' => 'Display even more information, including internal messages.');
   $options['yes']                = array('short-form' => 'y', 'context' => 'DRUSH_AFFIRMATIVE', 'description' => "Assume 'yes' as answer to all prompts.");
   $options['no']                 = array('short-form' => 'n', 'context' => 'DRUSH_NEGATIVE', 'description' => "Assume 'no' as answer to all prompts.");
-  $options['simulate']           = array('short-form' => 's', 'context' => 'DRUSH_SIMULATE', 'never-propagate' => TRUE, 'description' => "Simulate all relevant actions (don't actually change the system).");
+  $options['simulate']           = array('short-form' => 's', 'context' => 'DRUSH_SIMULATE', 'never-propagate' => TRUE, 'description' => "Simulate all relevant actions (don't actually change the system).", 'symfony-conflict' => TRUE);
   $options['pipe']               = array('short-form' => 'p', 'hidden' => TRUE, 'description' => "Emit a compact representation of the command for scripting.");
   $options['help']               = array('short-form' => 'h', 'description' => "This help system.");
 
@@ -1259,6 +1259,15 @@ function drush_log($message, $type = LogLevel::INFO, $error = null) {
   $entry['error'] = $error;
 
   return _drush_log($entry);
+}
+
+/**
+ * Future: add some sort of dependency injection to Drush.
+ */
+function _drush_create_default_logger() {
+  $drush_logger = new Logger();
+  drush_set_context('DRUSH_LOGGER', $drush_logger);
+  drush_set_context('DRUSH_LOG_CALLBACK', $drush_logger);
 }
 
 /**

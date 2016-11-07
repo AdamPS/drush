@@ -6,6 +6,7 @@
  */
 
 use League\Container\ContainerInterface;
+use SebastianBergmann\Version;
 
 /**
  * Static Service Container wrapper.
@@ -52,6 +53,13 @@ class Drush {
   protected static $container;
 
   /**
+   * The Robo Runner -- manages and constructs all commandfile classes
+   *
+   * @var \Robo\Runner
+   */
+  protected static $runner;
+
+  /**
    * Return the current Drush version.
    *
    * n.b. Called before the DI container is initialized.
@@ -60,7 +68,8 @@ class Drush {
   public static function getVersion() {
     if (!static::$version) {
       $drush_info = static::drush_read_drush_info();
-      static::$version = $drush_info['drush_version'];
+      $instance = new Version($drush_info['drush_version'], DRUSH_BASE_PATH);
+      static::$version = $instance->getversion();
     }
     return static::$version;
   }
@@ -124,6 +133,18 @@ class Drush {
   }
 
   /**
+   * Return the Robo runner.
+   *
+   * @return \Robo\Runner
+   */
+  public static function runner() {
+    if (!isset(static::$runner)) {
+      static::$runner = new \Robo\Runner();
+    }
+    return static::$runner;
+  }
+
+  /**
    * Retrieves a service from the container.
    *
    * Use this method if the desired service is not one of those with a dedicated
@@ -152,6 +173,15 @@ class Drush {
   public static function hasService($id) {
     // Check hasContainer() first in order to always return a Boolean.
     return static::hasContainer() && static::getContainer()->has($id);
+  }
+
+  /**
+   * Return command factory
+   *
+   * @return \Consolidation\AnnotatedCommand\AnnotatedCommandFactory
+   */
+  public static function commandFactory() {
+    return static::service('commandFactory');
   }
 
   /**

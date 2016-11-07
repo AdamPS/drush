@@ -2,8 +2,8 @@ Install/Upgrade a global Drush
 ---------------
 ```sh
 # Download latest stable release using the code below or browse to github.com/drush-ops/drush/releases.
-php -r "readfile('http://files.drush.org/drush.phar');" > drush
-# Or use our upcoming release: php -r "readfile('http://files.drush.org/drush-unstable.phar');" > drush
+php -r "readfile('https://s3.amazonaws.com/files.drush.org/drush.phar');" > drush
+# Or use our upcoming release: php -r "readfile('https://s3.amazonaws.com/files.drush.org/drush-unstable.phar');" > drush
 
 # Test your install.
 php drush core-status
@@ -35,7 +35,7 @@ Drupal Compatibility
 -----------------
 Drush Version | Drush Branch  | PHP | Compatible Drupal versions | Code Status
 ------------- | ---------     | --- | -------------------------- | -----------
-Drush 9       | [master](https://travis-ci.org/drush-ops/drush)  | 5.5+ | D7, D8                 | <img src="https://travis-ci.org/drush-ops/drush.svg?branch=master">
+Drush 9       | [master](https://travis-ci.org/drush-ops/drush)  | 5.6+ | D7, D8                 | <img src="https://travis-ci.org/drush-ops/drush.svg?branch=master">
 Drush 8       | [8.x](https://travis-ci.org/drush-ops/drush)  | 5.4.5+ | D6, D7, D8                 | <img src="https://travis-ci.org/drush-ops/drush.svg?branch=8.x">
 Drush 7       | [7.x](https://travis-ci.org/drush-ops/drush) | 5.3.0+ | D6, D7                     | <img src="https://travis-ci.org/drush-ops/drush.svg?branch=7.x">
 Drush 6       | [6.x](https://travis-ci.org/drush-ops/drush) | 5.3.0+ | D6, D7                     | Unsupported

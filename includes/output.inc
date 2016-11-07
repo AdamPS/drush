@@ -38,6 +38,8 @@ function drush_print($message = '', $indent = 0, $handle = NULL, $newline = TRUE
   }
   else {
     print $msg;
+    //$output = \Drush::service('output');
+    //$output->write($msg);
   }
 }
 
@@ -160,7 +162,7 @@ function dt($string, $args = array()) {
     foreach (array_keys($legacy_args) as $legacy_arg_key) {
       unset($args[$legacy_arg_key]);
     }
-    $output = \Drupal::translation()->translate($string, $args);
+    $output = (string) \Drupal::translation()->translate($string, $args);
   }
   else if (function_exists('t') && drush_drupal_major_version() <= 7 && function_exists('theme')) {
     $output = t($string, $args);

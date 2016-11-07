@@ -4,19 +4,6 @@
 # Use `drush init` to copy this file to your home directory, rename and
 # customize it to suit, and source it from your ~/.bashrc file.
 #
-# Example - rename this to drush.bashrc, and in your
-# ~/.bashrc add:
-#
-#
-#    if [ -f ~/.drush/drush.bashrc ] ; then
-#        . ~/.drush/drush.bashrc
-#    fi
-#
-# Features:
-#
-# Finds and sources drush.complete.sh from your drush directory,
-# enabling autocompletion for Drush commands.
-#
 # Creates aliases to common Drush commands that work in a global context:
 #
 #       dr               - drush
@@ -269,7 +256,7 @@ function dssh() {
 }
 
 # Drush checks the current PHP version to ensure compatibility, and fails with
-# an error if less than the supported minimum (currently 5.5.0). If you would
+# an error if less than the supported minimum (currently 5.6.0). If you would
 # like to try to run Drush on a lower version of PHP, you can un-comment the
 # line below to skip this check. Note, however, that this is un-supported.
 

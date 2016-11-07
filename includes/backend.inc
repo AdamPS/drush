@@ -838,7 +838,7 @@ function drush_backend_invoke_concurrent($invocations, $common_options = array()
     // use a default value.  For commands that are being executed on the same
     // machine, we will use DRUSH_COMMAND, which is the path to the drush.php
     // that is running right now.  For remote commands, we will run a wrapper
-    // script instead of drush.php -- drush.bat on Windows, or drush on Linux.
+    // script instead of drush.php called drush.
     $drush_path = $site_record['path-aliases']['%drush-script'];
     if (!$drush_path && !$is_remote && $is_different_site) {
       $drush_path = find_wrapper_or_launcher($site_record['root']);
@@ -1158,31 +1158,20 @@ function _drush_backend_generate_command($site_record, $command, $args = array()
   }
   $command = implode(' ', array_filter($cmd, 'strlen'));
   if (isset($hostname)) {
-    if (drush_is_windows($os)) {
-      if (isset($username)) {
-        $username = " -u:" . drush_escapeshellarg($username, "LOCAL");
-        if (array_key_exists('winrs-password', $site_record)) {
-          $username .= " -p:" . drush_escapeshellarg($site_record['winrs-password'], "LOCAL");
-        }
-      }
-      $command = "winrs" . $username . " -r:" . drush_escapeshellarg($hostname, "LOCAL") . " " . drush_escapeshellarg($command, "LOCAL");
-    }
-    else {
-      $username = (isset($username)) ? drush_escapeshellarg($username, "LOCAL") . "@" : '';
-      $ssh_options = $site_record['ssh-options'];
-      $ssh_options = (isset($ssh_options)) ? $ssh_options : drush_get_option('ssh-options', "-o PasswordAuthentication=no");
+    $username = (isset($username)) ? drush_escapeshellarg($username, "LOCAL") . "@" : '';
+    $ssh_options = $site_record['ssh-options'];
+    $ssh_options = (isset($ssh_options)) ? $ssh_options : drush_get_option('ssh-options', "-o PasswordAuthentication=no");
 
-      $ssh_cmd[] = "ssh";
-      $ssh_cmd[] = $ssh_options;
-      if ($backend_options['#tty']) {
-        $ssh_cmd[] = '-t';
-      }
-      $ssh_cmd[] = $username . drush_escapeshellarg($hostname, "LOCAL");
-      $ssh_cmd[] = drush_escapeshellarg($command . ' 2>&1', "LOCAL");
-
-      // Remove NULLs and separate with spaces
-      $command = implode(' ', array_filter($ssh_cmd, 'strlen'));
+    $ssh_cmd[] = "ssh";
+    $ssh_cmd[] = $ssh_options;
+    if ($backend_options['#tty']) {
+      $ssh_cmd[] = '-t';
     }
+    $ssh_cmd[] = $username . drush_escapeshellarg($hostname, "LOCAL");
+    $ssh_cmd[] = drush_escapeshellarg($command . ' 2>&1', "LOCAL");
+
+    // Remove NULLs and separate with spaces
+    $command = implode(' ', array_filter($ssh_cmd, 'strlen'));
   }
 
   return $command;
