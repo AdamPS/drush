@@ -127,13 +127,13 @@ function drush_pm_download() {
     // For Drupal core: --drupal-project-rename or drupal-x.y
     if (($request['project_type'] == 'core') ||
         (($request['project_type'] == 'profile') && (drush_get_option('variant', 'full') == 'full'))) {
-      // Avoid downloading core into existing core.
-      if (drush_get_context('DRUSH_BOOTSTRAP_PHASE') >= DRUSH_BOOTSTRAP_DRUPAL_ROOT) {
-        if (strpos(realpath(drush_get_option('destination')), DRUPAL_ROOT) !== FALSE) {
-          return drush_set_error('DRUSH_PM_DOWNLOAD_TRANSLATIONS_FORBIDDEN', dt('It\'s forbidden to download !project core into an existing core.', array('!project' => $request['name'])));
-        }
+      // Downloading core into existing core.
+      if ((drush_get_context('DRUSH_BOOTSTRAP_PHASE') >= DRUSH_BOOTSTRAP_DRUPAL_ROOT) &&
+          (strpos(realpath(drush_get_option('destination')), DRUPAL_ROOT) !== FALSE)) {
+          $request['project_dir'] = '';
+          $request['update_core'] = TRUE;
       }
-
+      else
       if ($rename = drush_get_option('drupal-project-rename', FALSE)) {
         if ($rename === TRUE) {
           $request['project_dir'] = $request['name'];
@@ -198,24 +198,15 @@ function drush_pm_download() {
     if ($version_control->engine == 'backup') {
       // Check if install location already exists.
       if (is_dir($request['project_install_location'])) {
-        if (drush_confirm(dt('Install location !location already exists. Do you want to overwrite it?', array('!location' => $request['project_install_location'])))) {
-          drush_delete_dir($request['project_install_location'], TRUE);
-        }
-        else {
+        if (!drush_confirm(dt('Install location !location already exists. Do you want to overwrite it?', array('!location' => $request['project_install_location'])))) {
           drush_log(dt("Skip installation of !project to !dest.", array('!project' => $request['name'], '!dest' => $request['project_install_location'])), LogLevel::WARNING);
           continue;
         }
       }
     }
-    else {
-      // Find and unlink all files but the ones in the vcs control directories.
-      $skip_list = array('.', '..');
-      $skip_list = array_merge($skip_list, drush_version_control_reserved_files());
-      drush_scan_directory($request['project_install_location'], '/.*/', $skip_list, 'unlink', TRUE, 'filename', 0, TRUE);
-    }
 
     // Copy the project to the install location.
-    if (drush_op('_drush_recursive_copy', $request['full_project_path'], $request['project_install_location'])) {
+    if (drush_copy_project($request)) {
       drush_log(dt("Project !project (!version) downloaded to !dest.", array('!project' => $request['name'], '!version' => $release['version'], '!dest' => $request['project_install_location'])), LogLevel::SUCCESS);
       // Adjust full_project_path to the final project location.
       $request['full_project_path'] = $request['project_install_location'];
@@ -383,6 +374,10 @@ function _pm_download_destination($type) {
     if (empty($destination) && $site_root && is_dir($full_site_root)) {
       $destination = _pm_download_destination_lookup($type, $drupal_root, $full_site_root, TRUE);
     }
+  }
+  else {
+    // Core always goes in Drupal root.
+    $destination = $drupal_root;
   }
   // Attempt 6: If we didn't find a valid directory yet (or we somehow found
   // one that doesn't exist) we always fall back to the current directory.
